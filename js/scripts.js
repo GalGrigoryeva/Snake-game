@@ -35,7 +35,6 @@ const createTable = () => {
   body.appendChild(tbl);
 }
 
-
 const render = () => {
   for (var i = 0; i < cellsArr.length; i++) {
     var cell = cellsArr[i];
@@ -175,7 +174,8 @@ const dropApple = () => {
   if (emptyCells.length == 0){
     gameState = "game_over";
   } else {
-    apple = emptyCells[getRandomInt(0, emptyCells.length)];
+    apple = emptyCells[getRandomInt(0, emptyCells.length - 1)];
+    console.log(apple);
   }
 }
 
