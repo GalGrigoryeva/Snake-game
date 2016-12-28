@@ -2,15 +2,43 @@ var columnCount = 16;
 var rowCount = 16;
 
 var cellsArr = [];
-var snake = [ {x:5, y:3}, {x:4, y:3}, {x:3, y:3} ];
+var snake;
 
-var snakeDirection = "right";
+var snakeDirection;
 var newSnakeDirection;
 
-var apple = {x:1, y:1};
+var apple;
 
-var gameState = "running";
+var gameState;
+var isGamePaused;
 var updateIntervalId;
+
+var overlay = document.querySelector(".modal-overlay");
+var popup = document.querySelector(".modal-content");
+var close = popup.querySelector(".btn-exit");
+
+var restartBtn = document.querySelectorAll(".btn-restart");
+var pause = document.querySelector(".btn-pause");
+
+close.addEventListener("click", function(event) {
+    event.preventDefault();
+    overlay.classList.remove("modal-overlay-show");
+    popup.classList.remove("modal-content-show");
+  });
+
+for (var i = 0; i < restartBtn.length; i++) {
+  restartBtn[i].addEventListener("click", function(event) {
+    event.preventDefault();
+    overlay.classList.remove("modal-overlay-show");
+    popup.classList.remove("modal-content-show");
+    restart();
+  });
+}
+
+pause.addEventListener("click", function(event) {
+  event.preventDefault();
+  isGamePaused = !isGamePaused;
+});
 
 const createTable = () => {
   var body = document.getElementsByTagName("body")[0];
@@ -33,6 +61,26 @@ const createTable = () => {
 
   tbl.appendChild(tblBody);
   body.appendChild(tbl);
+}
+
+const restart = () => {
+  snake = [ {x:5, y:3}, {x:4, y:3}, {x:3, y:3} ];
+
+  snakeDirection = "right";
+  newSnakeDirection = null;
+
+  apple = null;
+  dropApple();
+
+  gameState = "running";
+  isGamePaused = false;
+
+  render();
+
+  if (updateIntervalId) {
+    clearInterval(updateIntervalId);
+  }
+  updateIntervalId = setInterval(update, 250);
 }
 
 const render = () => {
@@ -121,12 +169,17 @@ const updateSnake = () => {
 }
 
 const update = () => {
+  if (isGamePaused) {
+    return;
+  }
+
   updateSnake();
   render();
 
   if (gameState == "game_over") {
     clearInterval(updateIntervalId);
-    alert("GAME OVER!");
+    overlay.classList.add("modal-overlay-show");
+    popup.classList.add("modal-content-show");
   }
 }
 
@@ -162,7 +215,7 @@ const dropApple = () => {
           isCellEmpty = false;
         }
       }
-      if (positionsIsEqual(position, apple)) {
+      if (apple && positionsIsEqual(position, apple)) {
         isCellEmpty = false;
       }
 
@@ -175,7 +228,6 @@ const dropApple = () => {
     gameState = "game_over";
   } else {
     apple = emptyCells[getRandomInt(0, emptyCells.length - 1)];
-    console.log(apple);
   }
 }
 
@@ -183,7 +235,5 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-
 createTable();
-render();
-updateIntervalId = setInterval(update, 250);
+restart();
